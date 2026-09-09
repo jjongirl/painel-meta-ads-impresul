@@ -1,0 +1,365 @@
+<!DOCTYPE html><script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Meta Ads Exec Impresul",
+  "schemaVersion": 1,
+  "description": "Painel executivo ao vivo de Meta Ads da Impresul. Puxa dados frescos do conector Meta Ads a cada abertura: KPIs (investimento, alcance, impressões, cliques, CTR, CPC, CPM, frequência), resumo executivo automático, gráfico de investimento e cliques por dia, top campanhas por investimento e tabela completa. Seletor de período (7/14/30 dias, mês atual, mês passado) com preferência salva.",
+  "mcpTools": [],
+  "mcpServerNames": []
+}
+</script>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel Meta Ads — Impresul</title>
+<style>
+:root{color-scheme:light;--bg:#f4f6fb;--card:#fff;--ink:#0f1e3d;--ink-soft:#5b6b8c;--line:#e4e9f2;--brand:#0b3fae;--brand-soft:#eaf0ff;--green:#0a8f5b;--amber:#b7791f;--red:#c0392b;--shadow:0 1px 2px rgba(15,30,61,.06),0 4px 16px rgba(15,30,61,.06)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5}
+.wrap{max-width:1060px;margin:0 auto;padding:20px 20px 52px}
+header.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:14px}
+h1{font-size:20px;margin:0;letter-spacing:-.2px}
+.sub{color:var(--ink-soft);font-size:12.5px;margin-top:3px}
+.badge{background:var(--brand-soft);color:var(--brand);font-weight:700;font-size:11.5px;padding:6px 12px;border-radius:999px}
+.toolbar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.periods{display:flex;gap:7px;flex-wrap:wrap}
+.periods button{border:1px solid var(--line);background:var(--card);color:var(--ink-soft);padding:9px 15px;border-radius:999px;font-size:13px;cursor:pointer;font-weight:700;transition:.15s}
+.periods button:hover{border-color:var(--brand);color:var(--brand)}
+.periods button.active{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn-report{margin-left:auto;border:1px solid var(--brand);background:var(--brand);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer}
+.btn-report:hover{background:#0a2f86}
+.btn-ghost{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 14px;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow);margin-bottom:16px}
+.panel h2{font-size:15px;margin:0 0 12px}
+.panel h3{font-size:13px;margin:16px 0 8px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.5px}
+.resumo{border-left:4px solid var(--brand)}
+.resumo .lead{font-size:15px;line-height:1.7}
+.resumo b{color:var(--brand)}
+ul.plain{margin:6px 0 0;padding-left:20px}
+ul.plain li{margin:6px 0}
+.gloss{display:grid;grid-template-columns:1fr 1fr;gap:8px 22px;margin-top:6px}
+.gloss div{font-size:12.5px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+.kpi .lab{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-soft);font-weight:700}
+.kpi .val{font-size:23px;font-weight:750;margin-top:6px;letter-spacing:-.5px}
+.kpi .foot{font-size:11px;color:var(--ink-soft);margin-top:2px}
+.cols{display:flex;align-items:flex-end;gap:3px;height:190px;padding-top:6px}
+.col-wrap{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;min-width:0}
+.col{width:100%;background:var(--brand);border-radius:4px 4px 0 0;min-height:3px}
+.col:hover{background:#0a2f86}
+.col-lab{font-size:9px;color:var(--ink-soft);margin-top:5px;white-space:nowrap;transform:rotate(-45deg);transform-origin:center}
+.bar-row{display:grid;grid-template-columns:200px 1fr 92px;align-items:center;gap:10px;margin:7px 0;font-size:12px}
+.bar-track{background:#eef1f7;border-radius:6px;height:16px;overflow:hidden}
+.bar-fill{background:var(--brand);height:100%;border-radius:6px}
+.bar-val{text-align:right;color:var(--ink-soft);font-weight:600}
+.bar-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:9px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal;max-width:280px}
+th{color:var(--ink-soft);font-size:11px;text-transform:uppercase;letter-spacing:.4px;font-weight:700}
+tbody tr:hover{background:#fafbff}
+td.name{font-weight:600}
+.foot-note{color:var(--ink-soft);font-size:11.5px;margin-top:10px}
+.err{background:#fff3f2;border:1px solid #f3c9c4;color:#a1281c;border-radius:10px;padding:12px 14px;font-size:12.5px}
+/* Relatório */
+.report h2.rt{font-size:22px;margin:0 0 4px}
+.report .cover{border-left:5px solid var(--brand);padding:6px 0 6px 16px;margin-bottom:18px}
+.report .rp{break-inside:avoid}
+.report p{font-size:14px;line-height:1.75;margin:8px 0}
+.report .rec{background:#f0fbf5;border:1px solid #cdeadd;border-radius:10px;padding:12px 16px;margin-top:10px}
+.report .rec b{color:var(--green)}
+.report .warn{background:#fff8ee;border:1px solid #f0dcb8}
+.mini{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.mini div{background:#f7f9fd;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.mini .l{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.4px;font-weight:700}
+.mini .v{font-size:18px;font-weight:750;margin-top:3px}
+@media(max-width:820px){.grid{grid-template-columns:repeat(2,1fr)}.gloss{grid-template-columns:1fr}.bar-row{grid-template-columns:120px 1fr 78px}.mini{grid-template-columns:repeat(2,1fr)}.btn-report{margin-left:0}}
+@media print{
+ .toolbar,.badge,.no-print,.foot-note{display:none!important}
+ body{background:#fff;font-size:12px}
+ .wrap{max-width:none;padding:0}
+ .panel{box-shadow:none;border:1px solid #d5dae4;break-inside:avoid}
+ .report .rp{break-before:page}
+ .report .rp:first-of-type{break-before:auto}
+ h1{font-size:18px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Painel de Anúncios — Impresul</h1>
+      <div class="sub">Facebook e Instagram (Meta Ads) · valores em reais (R$)</div>
+    </div>
+    <div class="badge">Atualizado em 18/08/2026</div>
+  </header>
+  <div class="toolbar">
+    <div class="periods" id="periods">
+      <button data-p="d7">Últimos 7 dias</button>
+      <button data-p="d30">Últimos 30 dias</button>
+      <button data-p="d90">Últimos 90 dias</button>
+      <button data-p="y1">Ano de 2025</button>
+    </div>
+    <button class="btn-report" id="reportBtn">📄 Relatório detalhado (PDF)</button>
+  </div>
+  <div id="content">Carregando…</div>
+  <div class="foot-note">Snapshot gerado em 18/08/2026 a partir do Meta Ads (conta Impresul Serviço Gráfico). O ranking de campanhas de 2025 vem do último snapshot bem-sucedido (ano-calendário fechado, não muda). Para trazer números novos, peça "atualize o painel de Meta Ads".</div>
+</div>
+
+<script>
+try{
+var brl=function(n){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n||0);};
+var intg=function(n){return new Intl.NumberFormat('pt-BR').format(Math.round(n||0));};
+var pct=function(n){return (n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';};
+var d1=function(n){return (n||0).toLocaleString('pt-BR',{maximumFractionDigits:1});};
+
+var DATA={
+ d7:{label:"Últimos 7 dias", range:"11/08 a 17/08/2026",
+   k:{spend:809.09,impressions:130996,reach:75382,clicks:1393,ctr:1.06,cpc:0.58,cpm:6.18},
+   camps:[
+    {name:"GERAL CLICK · Campanha de Engajamento",spend:133.80,impr:7844,reach:3827,clicks:41,ctr:0.52,cpc:3.26,cpm:17.06},
+    {name:"ATACADO · CATÁLOGO EM CARROSSEL",spend:120.05,impr:30475,reach:15445,clicks:868,ctr:2.85,cpc:0.14,cpm:3.94},
+    {name:"5 CURITIBA · CAMPANHA DE ENGAJAMENTO",spend:100.56,impr:3114,reach:1818,clicks:106,ctr:3.40,cpc:0.95,cpm:32.29},
+    {name:"CANOAS · PLANTAS",spend:92.62,impr:64748,reach:39901,clicks:92,ctr:0.14,cpc:1.01,cpm:1.43},
+    {name:"Impulsionamento · WhatsApp (11/08)",spend:74.89,impr:3858,reach:2327,clicks:95,ctr:2.46,cpc:0.79,cpm:19.41},
+    {name:"Impulsionamento · WhatsApp · Semana C Curitiba",spend:74.32,impr:3983,reach:2567,clicks:43,ctr:1.08,cpc:1.73,cpm:18.66},
+    {name:"CAMPANHA POLÍTICA · 1 CRIATIVO",spend:68.79,impr:3138,reach:1955,clicks:47,ctr:1.50,cpc:1.46,cpm:21.92},
+    {name:"CAMPANHA POLÍTICA · CARROSSEL",spend:53.87,impr:2038,reach:1333,clicks:29,ctr:1.42,cpc:1.86,cpm:26.43},
+    {name:"4 CURITIBA · CAMPANHA DE RECONHECIMENTO",spend:15.93,impr:9077,reach:6810,clicks:21,ctr:0.23,cpc:0.76,cpm:1.75},
+    {name:"CURITIBA · CAMPANHA WHATS API",spend:12.64,impr:330,reach:261,clicks:14,ctr:4.24,cpc:0.90,cpm:38.30},
+    {name:"GRAVATAÍ · ENGAJAMENTO WHATS API",spend:9.84,impr:316,reach:252,clicks:1,ctr:0.32,cpc:9.84,cpm:31.14},
+    {name:"ASSIS · ENGAJAMENTO WHATS API",spend:8.81,impr:198,reach:149,clicks:5,ctr:2.53,cpc:1.76,cpm:44.49}
+   ],
+   trend:[{d:"11/08",spend:66.32,clicks:71},{d:"12/08",spend:117.26,clicks:92},{d:"13/08",spend:116.54,clicks:164},{d:"14/08",spend:129.75,clicks:220},{d:"15/08",spend:101.61,clicks:251},{d:"16/08",spend:117.61,clicks:349},{d:"17/08",spend:160.00,clicks:246}],
+   trendTitle:"Investimento por dia"
+ },
+ d30:{label:"Últimos 30 dias", range:"19/07 a 17/08/2026",
+   k:{spend:3021.55,impressions:541916,reach:278002,clicks:5178,ctr:0.96,cpc:0.58,cpm:5.58},
+   camps:[
+    {name:"GERAL CLICK · Campanha de Engajamento",spend:413.76,impr:72972,reach:59220,clicks:454,ctr:0.62,cpc:0.91,cpm:5.67},
+    {name:"2 CURITIBA · CAMPANHA DE TRÁFEGO Campanha",spend:374.67,impr:80354,reach:40854,clicks:1432,ctr:1.78,cpc:0.26,cpm:4.66},
+    {name:"[13/07/2026] DIA DOS PAIS 01",spend:309.44,impr:22381,reach:13585,clicks:637,ctr:2.85,cpc:0.49,cpm:13.83},
+    {name:"CANOAS · PLANTAS",spend:268.70,impr:192278,reach:75253,clicks:285,ctr:0.15,cpc:0.94,cpm:1.40},
+    {name:"3 CURITIBA · CAMPANHA DE TRÁFEGO · promoçoes",spend:216.16,impr:6895,reach:3833,clicks:170,ctr:2.47,cpc:1.27,cpm:31.35},
+    {name:"[15/07/2026] DIA DOS PAIS · 02",spend:167.66,impr:6633,reach:3805,clicks:100,ctr:1.51,cpc:1.68,cpm:25.28},
+    {name:"Campanha de Tráfego · GERAL CLICK",spend:162.06,impr:6325,reach:3631,clicks:99,ctr:1.57,cpc:1.64,cpm:25.62},
+    {name:"Impulsionamento · Promocional Curitiba (28/07)",spend:149.60,impr:3792,reach:2554,clicks:56,ctr:1.48,cpc:2.67,cpm:39.45},
+    {name:"Impulsionamento · Site (13/07)",spend:146.00,impr:43072,reach:27280,clicks:439,ctr:1.02,cpc:0.33,cpm:3.39},
+    {name:"ATACADO · CATÁLOGO EM CARROSSEL",spend:120.05,impr:30475,reach:15445,clicks:868,ctr:2.85,cpc:0.14,cpm:3.94},
+    {name:"5 CURITIBA · CAMPANHA DE ENGAJAMENTO",spend:100.56,impr:3114,reach:1818,clicks:106,ctr:3.40,cpc:0.95,cpm:32.29},
+    {name:"4 CURITIBA · CAMPANHA DE RECONHECIMENTO",spend:91.18,impr:49439,reach:24333,clicks:105,ctr:0.21,cpc:0.87,cpm:1.84},
+    {name:"Impulsionamento · WhatsApp (11/08)",spend:74.89,impr:3858,reach:2327,clicks:95,ctr:2.46,cpc:0.79,cpm:19.41},
+    {name:"Impulsionamento · WhatsApp · Semana C Curitiba",spend:74.32,impr:3983,reach:2567,clicks:43,ctr:1.08,cpc:1.73,cpm:18.66},
+    {name:"CAMPANHA POLÍTICA · 1 CRIATIVO",spend:68.79,impr:3138,reach:1955,clicks:47,ctr:1.50,cpc:1.46,cpm:21.92}
+   ],
+   trend:[{d:"19/07",spend:105.44,clicks:247},{d:"20/07",spend:122.94,clicks:220},{d:"21/07",spend:126.09,clicks:224},{d:"22/07",spend:127.08,clicks:208},{d:"23/07",spend:92.57,clicks:200},{d:"24/07",spend:115.74,clicks:261},{d:"25/07",spend:133.39,clicks:269},{d:"26/07",spend:124.45,clicks:292},{d:"27/07",spend:156.88,clicks:278},{d:"28/07",spend:161.11,clicks:273},{d:"29/07",spend:120.93,clicks:199},{d:"30/07",spend:84.53,clicks:110},{d:"31/07",spend:63.17,clicks:82},{d:"01/08",spend:43.27,clicks:60},{d:"02/08",spend:66.91,clicks:91},{d:"03/08",spend:77.46,clicks:136},{d:"04/08",spend:82.95,clicks:102},{d:"05/08",spend:75.58,clicks:87},{d:"06/08",spend:57.65,clicks:94},{d:"07/08",spend:75.71,clicks:109},{d:"08/08",spend:69.93,clicks:100},{d:"09/08",spend:72.96,clicks:75},{d:"10/08",spend:55.72,clicks:68},{d:"11/08",spend:66.32,clicks:71},{d:"12/08",spend:117.26,clicks:92},{d:"13/08",spend:116.54,clicks:164},{d:"14/08",spend:129.75,clicks:220},{d:"15/08",spend:101.61,clicks:251},{d:"16/08",spend:117.61,clicks:349},{d:"17/08",spend:160.00,clicks:246}],
+   trendTitle:"Investimento por dia"
+ },
+ d90:{label:"Últimos 90 dias", range:"20/05 a 17/08/2026",
+   k:{spend:7136.99,impressions:1100595,reach:527465,clicks:11920,ctr:1.08,cpc:0.60,cpm:6.48},
+   camps:[
+    {name:"2 CURITIBA · CAMPANHA DE TRÁFEGO Campanha",spend:1022.19,impr:203708,reach:89642,clicks:3786,ctr:1.86,cpc:0.27,cpm:5.02},
+    {name:"Campanha de Tráfego · GERAL CLICK",spend:699.54,impr:25870,reach:13987,clicks:426,ctr:1.65,cpc:1.64,cpm:27.04},
+    {name:"GERAL CLICK · Campanha de Engajamento",spend:413.76,impr:72972,reach:59220,clicks:454,ctr:0.62,cpc:0.91,cpm:5.67},
+    {name:"[13/07/2026] DIA DOS PAIS 01",spend:388.23,impr:26541,reach:15613,clicks:724,ctr:2.73,cpc:0.54,cpm:14.63},
+    {name:"CANOAS · PLANTAS",spend:288.13,impr:207040,reach:76739,clicks:315,ctr:0.15,cpc:0.91,cpm:1.39},
+    {name:"Impulsionamento · Site (13/07)",spend:243.35,impr:72642,reach:39325,clicks:597,ctr:0.82,cpc:0.41,cpm:3.35},
+    {name:"[15/07/2026] DIA DOS PAIS · 02",spend:216.41,impr:8994,reach:5059,clicks:131,ctr:1.46,cpc:1.65,cpm:24.06},
+    {name:"3 CURITIBA · CAMPANHA DE TRÁFEGO · promoçoes",spend:216.16,impr:6895,reach:3833,clicks:170,ctr:2.47,cpc:1.27,cpm:31.35},
+    {name:"1 CURITIBA · Nova campanha de Reconhecimento",spend:199.76,impr:136317,reach:91602,clicks:198,ctr:0.15,cpc:1.01,cpm:1.47},
+    {name:"Impulsionamento · Promocional Curitiba (28/07)",spend:149.60,impr:3792,reach:2554,clicks:56,ctr:1.48,cpc:2.67,cpm:39.45},
+    {name:"Impulsionamento · WhatsApp (23/06)",spend:128.65,impr:7202,reach:3717,clicks:79,ctr:1.10,cpc:1.63,cpm:17.86},
+    {name:"ATACADO · CATÁLOGO EM CARROSSEL",spend:120.05,impr:30475,reach:15445,clicks:868,ctr:2.85,cpc:0.14,cpm:3.94},
+    {name:"Impulsionamento · Facebook (01/06)",spend:108.80,impr:6046,reach:3729,clicks:76,ctr:1.26,cpc:1.43,cpm:18.00},
+    {name:"5 CURITIBA · CAMPANHA DE ENGAJAMENTO",spend:100.56,impr:3114,reach:1818,clicks:106,ctr:3.40,cpc:0.95,cpm:32.29},
+    {name:"Impulsionamento · Facebook (22/06)",spend:95.67,impr:4653,reach:2960,clicks:39,ctr:0.84,cpc:2.45,cpm:20.56}
+   ],
+   trend:[{d:"20/05",spend:482.45,clicks:388},{d:"27/05",spend:225.71,clicks:171},{d:"03/06",spend:499.96,clicks:1416},{d:"10/06",spend:485.48,clicks:1257},{d:"17/06",spend:415.77,clicks:270},{d:"24/06",spend:543.26,clicks:455},{d:"01/07",spend:555.90,clicks:1002},{d:"08/07",spend:514.16,clicks:1004},{d:"15/07",spend:747.22,clicks:1470},{d:"22/07",spend:911.22,clicks:1781},{d:"29/07",spend:539.22,clicks:780},{d:"05/08",spend:473.87,clicks:604},{d:"12/08",spend:742.77,clicks:1322}],
+   trendTitle:"Investimento por semana"
+ },
+ y1:{label:"Ano de 2025", range:"01/01 a 31/12/2025",
+   k:{spend:22558.35,impressions:5738478,reach:2079045,clicks:21202,ctr:0.37,cpc:1.06,cpm:3.93},
+   camps:[
+    {name:"Nova campanha de Engajamento · GERAL CLICK",spend:4612.78,impr:215147,reach:87886,clicks:5271,ctr:2.45,cpc:0.88,cpm:21.44},
+    {name:"QUADROS 2025",spend:1880.42,impr:1635509,reach:921558,clicks:1591,ctr:0.10,cpc:1.18,cpm:1.15},
+    {name:"AZENHA · Engajamento",spend:1801.62,impr:89578,reach:40355,clicks:988,ctr:1.10,cpc:1.82,cpm:20.11},
+    {name:"CAMPANHA GEOLOCALIZAÇÃO · AZENHA",spend:1793.20,impr:85943,reach:35063,clicks:1376,ctr:1.60,cpc:1.30,cpm:20.86},
+    {name:"OTAVIO ROCHA · Engajamento",spend:1705.94,impr:78956,reach:33213,clicks:1265,ctr:1.60,cpc:1.35,cpm:21.61},
+    {name:"OSVALDO · Engajamento",spend:1459.29,impr:71453,reach:29898,clicks:957,ctr:1.34,cpc:1.52,cpm:20.42},
+    {name:"Campanha Tráfego · GERAL",spend:1200.39,impr:36138,reach:19471,clicks:593,ctr:1.64,cpc:2.02,cpm:33.22},
+    {name:"CAMPANHA GEOLOCALIZAÇÃO · CANOAS",spend:933.21,impr:64340,reach:19844,clicks:940,ctr:1.46,cpc:0.99,cpm:14.50},
+    {name:"CAMPANHA GEOLOCALIZAÇÃO · GRAVATAI",spend:929.92,impr:56029,reach:20587,clicks:765,ctr:1.37,cpc:1.22,cpm:16.60},
+    {name:"CAMPANHA GEOLOCALIZAÇÃO · CACHOEIRINHA",spend:927.80,impr:55763,reach:19477,clicks:795,ctr:1.43,cpc:1.17,cpm:16.64},
+    {name:"Nova campanha de Tráfego · GERAL CLICK",spend:900.56,impr:83258,reach:57702,clicks:3014,ctr:3.62,cpc:0.30,cpm:10.82},
+    {name:"Azenha · Campanha Loja Nova",spend:816.26,impr:695153,reach:423168,clicks:647,ctr:0.09,cpc:1.26,cpm:1.17},
+    {name:"NOVO HAMBURGO · Reconhecimento",spend:742.36,impr:498909,reach:395963,clicks:718,ctr:0.14,cpc:1.03,cpm:1.49},
+    {name:"OSVALDO · Reconhecimento",spend:664.68,impr:554153,reach:332627,clicks:549,ctr:0.10,cpc:1.21,cpm:1.20},
+    {name:"CACHOEIRINHA · Reconhecimento",spend:662.49,impr:568927,reach:342726,clicks:523,ctr:0.09,cpc:1.27,cpm:1.16}
+   ],
+   trend:[{d:"jan",spend:531.32,clicks:440},{d:"fev",spend:2027.79,clicks:1521},{d:"mar",spend:3049.65,clicks:2280},{d:"abr",spend:2856.57,clicks:2995},{d:"mai",spend:1793.17,clicks:1488},{d:"jun",spend:2792.45,clicks:2501},{d:"jul",spend:2501.69,clicks:2234},{d:"ago",spend:1906.84,clicks:1602},{d:"set",spend:1540.52,clicks:1155},{d:"out",spend:924.08,clicks:2086},{d:"nov",spend:1075.92,clicks:1798},{d:"dez",spend:1558.35,clicks:1102}],
+   trendTitle:"Investimento por mês"
+ }
+};
+var ORDER=["d7","d30","d90","y1"];
+
+var GLOSS=[
+ ["Investimento","quanto foi gasto em anúncios no período."],
+ ["Impressões","quantas vezes os anúncios apareceram na tela (a mesma pessoa pode ver várias vezes)."],
+ ["Alcance","quantas pessoas diferentes viram os anúncios."],
+ ["Cliques","quantas vezes as pessoas clicaram (ex.: abrir o WhatsApp, o site ou o perfil)."],
+ ["CTR","de cada 100 pessoas que viram, quantas clicaram. Quanto maior, mais chamativo o anúncio."],
+ ["CPC","quanto custou, em média, cada clique. Quanto menor, melhor."],
+ ["CPM","quanto custou para o anúncio aparecer 1.000 vezes."],
+ ["Frequência","quantas vezes, em média, cada pessoa viu o anúncio."]
+];
+
+function bestBy(camps,f,cmp){var a=camps.filter(f);if(!a.length)return null;return a.slice().sort(cmp)[0];}
+
+function render(pk){
+ var p=DATA[pk], k=p.k;
+ var sorted=p.camps.slice().sort(function(a,b){return b.spend-a.spend;});
+ var freq=k.reach?k.impressions/k.reach:0;
+ var top=sorted[0];
+ var bestCtr=bestBy(p.camps,function(c){return c.clicks>=20;},function(a,b){return b.ctr-a.ctr;});
+ var cheap=bestBy(p.camps,function(c){return c.spend>10&&c.clicks>=10;},function(a,b){return a.cpc-b.cpc;});
+ var bigReach=bestBy(p.camps,function(c){return true;},function(a,b){return b.reach-a.reach;});
+
+ var lead="No período de <b>"+p.range+"</b>, a Impresul investiu <b>"+brl(k.spend)+"</b> em anúncios no Facebook e Instagram. "+
+  "Os anúncios apareceram <b>"+intg(k.impressions)+"</b> vezes nas telas e chegaram a <b>"+intg(k.reach)+"</b> pessoas diferentes. "+
+  "Foram <b>"+intg(k.clicks)+"</b> cliques, e cada clique custou em média <b>"+brl(k.cpc)+"</b>. "+
+  "Ou seja: de cada 100 pessoas que viram um anúncio, cerca de <b>"+d1(k.ctr)+"</b> clicaram.";
+
+ var t="<h3>Leitura rápida</h3><ul class=\"plain\">";
+ t+="<li>A campanha que mais recebeu verba foi <b>"+top.name+"</b> ("+brl(top.spend)+").</li>";
+ if(cheap) t+="<li>O clique mais barato veio de <b>"+cheap.name+"</b>: só <b>"+brl(cheap.cpc)+"</b> por clique.</li>";
+ if(bestCtr) t+="<li>O anúncio mais chamativo foi <b>"+bestCtr.name+"</b>, com CTR de <b>"+pct(bestCtr.ctr)+"</b> (média do período: "+pct(k.ctr)+").</li>";
+ if(bigReach) t+="<li>A maior vitrine foi <b>"+bigReach.name+"</b>, vista por <b>"+intg(bigReach.reach)+"</b> pessoas.</li>";
+ t+="<li>Em média, cada pessoa viu os anúncios <b>"+d1(freq)+" vezes</b>.</li></ul>";
+
+ var g="<h3>O que cada número significa</h3><div class=\"gloss\">";
+ GLOSS.forEach(function(x){g+="<div><b>"+x[0]+":</b> "+x[1]+"</div>";});
+ g+="</div>";
+
+ var h="<div class=\"panel resumo\"><h2>Resumo — "+p.label+"</h2><div class=\"lead\">"+lead+"</div>"+t+g+"</div>";
+
+ var kpis=[["Investimento",brl(k.spend),""],["Alcance",intg(k.reach),"pessoas diferentes"],["Impressões",intg(k.impressions),"vezes exibido"],["Cliques",intg(k.clicks),""],["CTR (chamou clique)",pct(k.ctr),"de cada 100 que viram"],["Custo por clique",brl(k.cpc),"média"],["CPM (por mil views)",brl(k.cpm),""],["Frequência",d1(freq)+"x","views por pessoa"]];
+ h+="<div class=\"grid\">";
+ kpis.forEach(function(x){h+="<div class=\"kpi\"><div class=\"lab\">"+x[0]+"</div><div class=\"val\">"+x[1]+"</div><div class=\"foot\">"+x[2]+"</div></div>";});
+ h+="</div>";
+
+ var maxS=Math.max.apply(null,p.trend.map(function(x){return x.spend;}));
+ var showLab=p.trend.length<=16;
+ h+="<div class=\"panel\"><h2>"+p.trendTitle+"</h2><div class=\"cols\">";
+ p.trend.forEach(function(x){var pc=Math.max(3,Math.round(x.spend/maxS*100));h+="<div class=\"col-wrap\"><div class=\"col\" style=\"height:"+pc+"%\" title=\""+x.d+": "+brl(x.spend)+" · "+intg(x.clicks)+" cliques\"></div>"+(showLab?"<div class=\"col-lab\">"+x.d+"</div>":"")+"</div>";});
+ h+="</div>";
+ if(!showLab)h+="<div class=\"foot-note\">Cada barra é um dia ("+p.trend[0].d+" → "+p.trend[p.trend.length-1].d+"). Passe o mouse para ver o valor.</div>";
+ h+="</div>";
+
+ var maxSp=sorted[0].spend;
+ h+="<div class=\"panel\"><h2>Onde o dinheiro foi (top campanhas)</h2>";
+ sorted.slice(0,8).forEach(function(c){var w=Math.max(2,Math.round(c.spend/maxSp*100));h+="<div class=\"bar-row\"><div class=\"bar-name\" title=\""+c.name+"\">"+c.name+"</div><div class=\"bar-track\"><div class=\"bar-fill\" style=\"width:"+w+"%\"></div></div><div class=\"bar-val\">"+brl(c.spend)+"</div></div>";});
+ h+="</div>";
+
+ h+="<div class=\"panel\"><h2>Todas as campanhas do período ("+sorted.length+")</h2><div style=\"overflow-x:auto\"><table><thead><tr><th>Campanha</th><th>Investimento</th><th>Alcance</th><th>Impressões</th><th>Cliques</th><th>CTR</th><th>Custo/clique</th></tr></thead><tbody>";
+ sorted.forEach(function(c){h+="<tr><td class=\"name\">"+c.name+"</td><td>"+brl(c.spend)+"</td><td>"+intg(c.reach)+"</td><td>"+intg(c.impr)+"</td><td>"+intg(c.clicks)+"</td><td>"+pct(c.ctr)+"</td><td>"+brl(c.cpc)+"</td></tr>";});
+ h+="</tbody></table></div></div>";
+
+ document.getElementById('content').innerHTML=h;
+}
+
+// ===== Relatório detalhado (para apresentar / salvar em PDF) =====
+function reportPeriod(pk){
+ var p=DATA[pk], k=p.k;
+ var sorted=p.camps.slice().sort(function(a,b){return b.spend-a.spend;});
+ var freq=k.reach?k.impressions/k.reach:0;
+ var top=sorted[0];
+ var cheap=bestBy(p.camps,function(c){return c.spend>10&&c.clicks>=10;},function(a,b){return a.cpc-b.cpc;});
+ var pricey=bestBy(p.camps,function(c){return c.spend>10&&c.clicks>=5;},function(a,b){return b.cpc-a.cpc;});
+ var bestCtr=bestBy(p.camps,function(c){return c.clicks>=20;},function(a,b){return b.ctr-a.ctr;});
+ var bigReach=bestBy(p.camps,function(c){return true;},function(a,b){return b.reach-a.reach;});
+ var invPct=Math.round(top.spend/k.spend*100);
+
+ var s="<div class=\"panel rp\"><h2 class=\"rt\">"+p.label+"</h2>";
+ s+="<div class=\"sub\" style=\"margin-bottom:10px\">Período: "+p.range+"</div>";
+ s+="<div class=\"mini\">";
+ s+="<div><div class=\"l\">Investimento</div><div class=\"v\">"+brl(k.spend)+"</div></div>";
+ s+="<div><div class=\"l\">Pessoas alcançadas</div><div class=\"v\">"+intg(k.reach)+"</div></div>";
+ s+="<div><div class=\"l\">Cliques</div><div class=\"v\">"+intg(k.clicks)+"</div></div>";
+ s+="<div><div class=\"l\">Custo por clique</div><div class=\"v\">"+brl(k.cpc)+"</div></div>";
+ s+="</div>";
+
+ s+="<p><b>O que aconteceu.</b> Neste período, a Impresul colocou <b>"+brl(k.spend)+"</b> em anúncios no Facebook e Instagram. "+
+  "Esses anúncios foram exibidos <b>"+intg(k.impressions)+"</b> vezes e chegaram a <b>"+intg(k.reach)+"</b> pessoas diferentes — cada pessoa viu, em média, "+d1(freq)+" vezes. "+
+  "No total, <b>"+intg(k.clicks)+"</b> pessoas clicaram para saber mais (abrir o WhatsApp, o site ou o perfil), pagando em média <b>"+brl(k.cpc)+"</b> por clique.</p>";
+
+ s+="<p><b>Isso é bom?</b> O CTR (o quanto o anúncio chamou clique) foi de <b>"+pct(k.ctr)+"</b> — ou seja, de cada 100 pessoas que viram, cerca de "+d1(k.ctr)+" clicaram. "+
+  "Vale lembrar que nem toda campanha existe para gerar clique: as campanhas de <b>Reconhecimento</b> servem para o máximo de gente ver a marca (muito alcance, poucos cliques), então o CTR baixo nelas é esperado e não é problema. "+
+  "Já as campanhas de <b>Tráfego/Engajamento</b> existem para gerar clique e conversa — nelas o que importa é clique barato.</p>";
+
+ s+="<p><b>Destaques.</b> A campanha que mais recebeu verba foi <b>"+top.name+"</b> ("+brl(top.spend)+", cerca de "+invPct+"% de tudo). ";
+ if(bestCtr) s+="O anúncio que mais chamou atenção foi <b>"+bestCtr.name+"</b>, com CTR de "+pct(bestCtr.ctr)+". ";
+ if(cheap) s+="O clique mais barato veio de <b>"+cheap.name+"</b>, a apenas "+brl(cheap.cpc)+" por clique. ";
+ if(bigReach) s+="E a maior vitrine foi <b>"+bigReach.name+"</b>, vista por "+intg(bigReach.reach)+" pessoas.";
+ s+="</p>";
+
+ s+="<div class=\"rec\"><b>Recomendações.</b><ul class=\"plain\">";
+ if(cheap) s+="<li>Investir mais em campanhas do tipo de <b>"+cheap.name+"</b>, que traz cliques baratos ("+brl(cheap.cpc)+" cada).</li>";
+ if(pricey && cheap && pricey.name!==cheap.name) s+="<li>Rever <b>"+pricey.name+"</b>: o clique saiu caro ("+brl(pricey.cpc)+"). Vale testar uma nova imagem/texto ou um público diferente.</li>";
+ s+="<li>Manter as campanhas de Reconhecimento para a marca continuar aparecendo, mas avaliá-las pelo alcance — não pelo clique.</li>";
+ s+="</ul></div>";
+
+ s+="<h3>Campanhas do período</h3><div style=\"overflow-x:auto\"><table><thead><tr><th>Campanha</th><th>Investimento</th><th>Alcance</th><th>Cliques</th><th>CTR</th><th>Custo/clique</th></tr></thead><tbody>";
+ sorted.forEach(function(c){s+="<tr><td class=\"name\">"+c.name+"</td><td>"+brl(c.spend)+"</td><td>"+intg(c.reach)+"</td><td>"+intg(c.clicks)+"</td><td>"+pct(c.ctr)+"</td><td>"+brl(c.cpc)+"</td></tr>";});
+ s+="</tbody></table></div></div>";
+ return s;
+}
+
+function buildReport(){
+ var y=DATA.y1.k, d90=DATA.d90.k, d30=DATA.d30.k, d7=DATA.d7.k;
+ var r="<div class=\"report\">";
+ r+="<div class=\"no-print\" style=\"display:flex;gap:8px;margin-bottom:14px\"><button class=\"btn-ghost\" id=\"backBtn\">← Voltar ao painel</button><button class=\"btn-report\" id=\"printBtn\" style=\"margin-left:0\">🖨 Salvar como PDF / Imprimir</button></div>";
+
+ r+="<div class=\"panel\"><div class=\"cover\"><h2 class=\"rt\">Relatório de Anúncios — Impresul</h2><div class=\"sub\">Facebook e Instagram (Meta Ads) · gerado em 18/08/2026 · valores em reais</div></div>";
+ r+="<p>Este relatório explica, em linguagem simples, o desempenho dos anúncios pagos da Impresul em quatro janelas de tempo: últimos 7 dias, últimos 30 dias, últimos 90 dias e o ano de 2025. Cada seção traz os números, o que eles significam e o que fazer a seguir. Ao final há um glossário com o significado de cada termo.</p>";
+ r+="<h3>Visão geral</h3>";
+ r+="<p>Em <b>2025</b>, a Impresul investiu <b>"+brl(y.spend)+"</b> em anúncios, que foram vistos por mais de <b>"+intg(y.reach)+"</b> pessoas diferentes e geraram <b>"+intg(y.clicks)+"</b> cliques. "+
+  "Ao longo de 2026, o dinheiro vem sendo usado de forma cada vez mais eficiente: o custo por clique caiu de <b>"+brl(y.cpc)+"</b> (média de 2025) para <b>"+brl(d90.cpc)+"</b> nos últimos 90 dias, <b>"+brl(d30.cpc)+"</b> nos últimos 30 dias e <b>"+brl(d7.cpc)+"</b> na última semana. "+
+  "Em outras palavras: hoje a Impresul paga menos para trazer cada pessoa interessada do que pagava no ano passado.</p>";
+ r+="<div class=\"rec\"><b>Principais conclusões.</b><ul class=\"plain\">"+
+  "<li>O clique segue barato em 2026 — bem abaixo da média de 2025, sinal de campanhas melhor ajustadas.</li>"+
+  "<li>As campanhas de <b>Tráfego/Engajamento</b> (ex.: 2 Curitiba Tráfego, Geral Click, Dia dos Pais) trazem muitos cliques por pouco dinheiro.</li>"+
+  "<li>O <b>ATACADO · Catálogo em Carrossel</b> segue sendo o clique mais barato da conta (cerca de R$ 0,14), com CTR bem acima da média — vale ampliar.</li>"+
+  "<li>Entraram no ar as campanhas <b>WHATS API</b> (Curitiba, Gravataí, Assis) e as duas <b>Campanhas Políticas</b>; ainda são investimentos pequenos e precisam de mais alguns dias para leitura confiável.</li>"+
+  "<li>As campanhas de <b>Reconhecimento</b> alcançam milhões de pessoas para fixar a marca; elas têm poucos cliques de propósito.</li>"+
+  "<li>Alguns impulsionamentos avulsos (WhatsApp, Promocional Curitiba) tiveram clique caro (acima de R$ 1,70) e merecem revisão.</li>"+
+  "</ul></div></div>";
+
+ ORDER.forEach(function(pk){ r+=reportPeriod(pk); });
+
+ r+="<div class=\"panel rp\"><h2 class=\"rt\">Glossário — o que cada número significa</h2><div class=\"gloss\">";
+ GLOSS.forEach(function(x){r+="<div><b>"+x[0]+":</b> "+x[1]+"</div>";});
+ r+="</div><p class=\"foot-note\" style=\"margin-top:14px\">Dados extraídos do Meta Ads (conta Impresul Serviço Gráfico) em 18/08/2026. Os números do ano de 2025 referem-se ao ano-calendário fechado e não mudam entre atualizações.</p></div>";
+ r+="</div>";
+
+ document.getElementById('content').innerHTML=r;
+ window.scrollTo(0,0);
+ document.getElementById('backBtn').addEventListener('click',function(){ render(cur); });
+ document.getElementById('printBtn').addEventListener('click',function(){ window.print(); });
+}
+
+var buttons=document.querySelectorAll('#periods button');
+var cur=localStorage.getItem('impresul_metaads_p3')||'d30';
+if(!DATA[cur])cur='d30';
+function setActive(pk){buttons.forEach(function(b){b.classList.toggle('active',b.getAttribute('data-p')===pk);});}
+buttons.forEach(function(b){b.addEventListener('click',function(){cur=b.getAttribute('data-p');localStorage.setItem('impresul_metaads_p3',cur);setActive(cur);render(cur);});});
+document.getElementById('reportBtn').addEventListener('click',buildReport);
+setActive(cur);render(cur);
+
+}catch(e){
+ document.getElementById('content').innerHTML='<div class="err"><b>Erro ao renderizar:</b> '+((e&&e.message)||e)+'</div>';
+}
+</script>
+</body>
+</html>
